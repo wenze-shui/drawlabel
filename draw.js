@@ -1,57 +1,106 @@
 //按下鼠标
-let yyy = document.getElementById('xxx')
+let canvas = document.getElementById('xxx')
+let context = canvas.getContext('2d')
 
-getWindowSize()
+autoResize()
 
-let context = yyy.getContext('2d')
-
-window.onresize = function() {
-  getWindowSize()
-}
+listenToUser()
 
 let painting = false
 let lastPoint = {'x': undefined, 'y': undefined}
-yyy.onmousedown = function(aaa){
-  let x = aaa.clientX
-  let y = aaa.clientY
-  if (usingEraser){
-    painting = true
-    context.clearRect(x-5,y-5,10,10)
-  }else{
-    painting = true
-    lastPoint = {'x': x, 'y': y}
-    console.log(lastPoint)
-    // drawCircle(x,y,1)
-  }
-}
 
-yyy.onmousemove = function(aaa){
-  let x = aaa.clientX
-  let y = aaa.clientY
-  if (!painting){
-    return
+
+function autoResize() {
+  getWindowSize()
+
+  window.onresize = function() {
+    getWindowSize()
   }
-  if (usingEraser){
-    context.clearRect(x,y,10,10)
-  }else{
-    let newPoint = {'x': x,'y': y}
-    // drawCircle(x,y,1)
-    drawLine(lastPoint.x, lastPoint.y, newPoint.x, newPoint.y)
-    lastPoint = newPoint
-  }
-  
-}
-yyy.onmouseup = function(aaa){
-  painting = false
 }
 
 function getWindowSize() {
   let pageWidth = document.documentElement.clientWidth
   let pageHeight = document.documentElement.clientHeight
 
-  yyy.width = pageWidth
-  yyy.height = pageHeight
+  canvas.width = pageWidth
+  canvas.height = pageHeight
 }
+
+function listenToUser() {
+  // 特性检测
+  if (document.body.ontouchstart !== undefined) {
+    canvas.ontouchstart = function(aaa) {
+      console.log('开始触摸')
+      let x = aaa.touches[0].clientX
+      let y = aaa.touches[0].clientY
+      if (usingEraser){
+        painting = true
+        context.clearRect(x-5,y-5,10,10)
+      }else{
+        painting = true
+        lastPoint = {'x': x, 'y': y}
+        // drawCircle(x,y,1)
+      }
+    }
+    
+    canvas.ontouchmove = function(aaa) {
+      console.log('触摸移动')
+      let x = aaa.touches[0].clientX
+      let y = aaa.touches[0].clientY
+      if (!painting){
+        return
+      }
+      if (usingEraser){
+        context.clearRect(x,y,10,10)
+      }else{
+        let newPoint = {'x': x,'y': y}
+        // drawCircle(x,y,1)
+        drawLine(lastPoint.x, lastPoint.y, newPoint.x, newPoint.y)
+        lastPoint = newPoint
+      }
+    }
+    
+    canvas.ontouchend = function(aaa) {
+      console.log('触摸结束')
+      painting = false
+    }
+  }else {
+    canvas.onmousedown = function(aaa){
+      let x = aaa.clientX
+      let y = aaa.clientY
+      if (usingEraser){
+        painting = true
+        context.clearRect(x-5,y-5,10,10)
+      }else{
+        painting = true
+        lastPoint = {'x': x, 'y': y}
+        // drawCircle(x,y,1)
+      }
+    }
+    
+    canvas.onmousemove = function(aaa){
+      let x = aaa.clientX
+      let y = aaa.clientY
+      if (!painting){
+        return
+      }
+      if (usingEraser){
+        context.clearRect(x,y,10,10)
+      }else{
+        let newPoint = {'x': x,'y': y}
+        // drawCircle(x,y,1)
+        drawLine(lastPoint.x, lastPoint.y, newPoint.x, newPoint.y)
+        lastPoint = newPoint
+      }
+      
+    }
+    canvas.onmouseup = function(aaa){
+      painting = false
+    }
+  }
+
+}
+
 function drawCircle(x,y,radius) {
   context.beginPath()
   context.arc(x,y,radius,0,Math.PI*2);
@@ -79,6 +128,9 @@ brush.onclick = function(){
   usingEraser = false
   actions.className = 'actions'
 }
+
+// ——————————————————————————————————————————————————————————————————————————————————
+
 // context.fillStyle = 'red'
 // context.fillRect(0, 0, 100, 100)
 // let painting = false
